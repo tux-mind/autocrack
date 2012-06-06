@@ -84,9 +84,6 @@ typedef bool _Bool;
 #	ifndef HAVE_SYS_SOCKET_H
 #		error "this system havn't sys/socket.h O_o"
 #	endif
-#	ifndef HAVE_PTHREAD_H
-#		error "this system havn't pthread.h O_o"
-#	endif
 #	ifndef HAVE_REGEX_H
 #		error "this system havn't regex.h"
 #	endif
@@ -96,10 +93,22 @@ typedef bool _Bool;
 #	ifndef HAVE_STRING_H
 #		error "this system havn't string.h O_o"
 #	endif
+#	ifndef HAVE_LIBCURL
+#		error "this system havn't libcurl installed"
+#	endif
+#	ifndef HAVE_LIBCRYPTO
+#		error "this system havn't crypto libs"
+#	endif
+#	ifndef HAVE_LIBPTHREAD
+#		error "this system havn't pthread.h O_o"
+#	endif
 #	ifdef STAT_MACROS_BROKEN
 #		error	"bad stat macros. ( Tektronix UTekV, Amdahl UTS and Motorola System V/88 )"
 #	endif
-
+#elif defined(BINS)
+#	warning "no config.h, but ssems that required macros exist...keep going.."
+#else
+#	error		"no config.h, ./configure script not executed or failed."
 #endif/* HAVE_CONFIG_H */
 
 
@@ -121,7 +130,9 @@ typedef bool _Bool;
 #include <libgen.h>
 #include <regex.h>
 #include <sys/stat.h>
-#include <magic.h>
+#ifdef HAVE_LIBMAGIC
+	#include <magic.h>
+#endif
 #include <netdb.h>
 #include <netinet/tcp.h>
 #include <curl/curl.h>

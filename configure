@@ -1325,8 +1325,7 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
-  --enable-debug=no/YES write debugging symbols and turn off optimization
-													default=$debug_default
+  --enable-debug=no/YES write debugging symbols and turn off optimization.
 
 Some influential environment variables:
   CC          C compiler command
@@ -5162,7 +5161,6 @@ fi
 
 
 
-
 for ac_header in sys/socket.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "sys/socket.h" "ac_cv_header_sys_socket_h" "$ac_includes_default"
@@ -5187,35 +5185,177 @@ fi
 
 done
 
-for ac_header in pthread.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "pthread.h" "ac_cv_header_pthread_h" "$ac_includes_default"
-if test "x$ac_cv_header_pthread_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_PTHREAD_H 1
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lpthread" >&5
+$as_echo_n "checking for main in -lpthread... " >&6; }
+if ${ac_cv_lib_pthread_main+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lpthread  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+int
+main ()
+{
+return main ();
+  ;
+  return 0;
+}
 _ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_pthread_main=yes
+else
+  ac_cv_lib_pthread_main=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_pthread_main" >&5
+$as_echo "$ac_cv_lib_pthread_main" >&6; }
+if test "x$ac_cv_lib_pthread_main" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBPTHREAD 1
+_ACEOF
+
+  LIBS="-lpthread $LIBS"
 
 fi
 
-done
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lcurl" >&5
+$as_echo_n "checking for main in -lcurl... " >&6; }
+if ${ac_cv_lib_curl_main+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lcurl  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+int
+main ()
+{
+return main ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_curl_main=yes
+else
+  ac_cv_lib_curl_main=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_curl_main" >&5
+$as_echo "$ac_cv_lib_curl_main" >&6; }
+if test "x$ac_cv_lib_curl_main" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBCURL 1
+_ACEOF
+
+  LIBS="-lcurl $LIBS"
+
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lcrypto" >&5
+$as_echo_n "checking for main in -lcrypto... " >&6; }
+if ${ac_cv_lib_crypto_main+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lcrypto  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+int
+main ()
+{
+return main ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_crypto_main=yes
+else
+  ac_cv_lib_crypto_main=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_crypto_main" >&5
+$as_echo "$ac_cv_lib_crypto_main" >&6; }
+if test "x$ac_cv_lib_crypto_main" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBCRYPTO 1
+_ACEOF
+
+  LIBS="-lcrypto $LIBS"
+
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lmagic" >&5
+$as_echo_n "checking for main in -lmagic... " >&6; }
+if ${ac_cv_lib_magic_main+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lmagic  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+int
+main ()
+{
+return main ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_magic_main=yes
+else
+  ac_cv_lib_magic_main=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_magic_main" >&5
+$as_echo "$ac_cv_lib_magic_main" >&6; }
+if test "x$ac_cv_lib_magic_main" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBMAGIC 1
+_ACEOF
+
+  LIBS="-lmagic $LIBS"
+
+fi
 
 
 debug_default="yes"
 # Check whether --enable-debug was given.
 if test "${enable_debug+set}" = set; then :
-  enableval=$enable_debug;
+  enableval=$enable_debug; enable_debug=$enableval
 else
   enable_debug=$debug_default
 fi
 
-if test "x$enable_debug" = "xyes"; then
+if test "x$enable_debug" == "xyes"; then
 	CFLAGS="$CFLAGS -ggdb -O0"
-	REDIRECT="&>/dev/null"
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 else
 	CFLAGS="$CFLAGS -g -O2 -ffast-math -fomit-frame-pointer -pipe"
-	REDIRECT="1>/dev/null"
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 fi
@@ -5476,7 +5616,7 @@ if test -n "$JTR"; then
 	echo "Testing john the ripper."
 	TESTOUT=/tmp/john.pot
 	rm -f "$TESTOUT"
-	$JTR --wordlist=test/uword --format=raw-md5 test/hash.md5 --pot="$TESTOUT" $REDIRECT
+	$JTR --wordlist=test/uword --format=raw-md5 test/hash.md5 --pot="$TESTOUT" &>/dev/null 2>/dev/tty
 	if test ! -f "$TESTOUT"; then
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: john the ripper test failed. usually you must install it in SYSTEMWIDE mode." >&5
 $as_echo "$as_me: WARNING: john the ripper test failed. usually you must install it in SYSTEMWIDE mode." >&2;}
@@ -5491,7 +5631,7 @@ fi
 if test -n "$COWPATTY"; then
 	TESTOUT=/tmp/cow.out
 	echo "Testing coWPAtty."
-	$COWPATTY -f test/uword -r test/wpa2psk-MOM1.dump -s MOM1 $REDIRECT 1>$TESTOUT
+	$COWPATTY -f test/uword -r test/wpa2psk-MOM1.dump -s MOM1 &>/dev/null 1>$TESTOUT
 	PSK=$( grep -oe "MOM12345" "$TESTOUT" )
 	if test -n "$PSK"; then
 		rm "$TESTOUT"
@@ -5511,7 +5651,7 @@ fi
 if test -n "$OCLHASHCAT"; then
 	TESTOUT=/tmp/ocl.out
 	echo "Testing oclhashcat-plus."
-	$OCLHASHCAT -m 0 -a 0 -o "$TESTOUT" --outfile-format=3 test/uword test/hash.md5
+	$OCLHASHCAT -m 0 -a 0 -o "$TESTOUT" --outfile-format=3 test/uword test/hash.md5 &>/dev/null 2>/dev/tty
 	PSWD=$(grep -o password "$TESTOUT")
 	if test -n "$PSWD"; then
 		rm "$TESTOUT"
@@ -5530,7 +5670,7 @@ fi
 if test -n "$PYRIT" ; then
 	TESTOUT=/tmp/pyr.out
 	echo "Testing pyrit."
-	$PYRIT -i test/uword -o "$TESTOUT" -r test/wpa2psk-MOM1.dump -e MOM1 	attack_passthrough
+	$PYRIT -i test/uword -o "$TESTOUT" -r test/wpa2psk-MOM1.dump -e MOM1 	attack_passthrough &>/dev/null 2>/dev/tty
 	PSK=$(grep -o MOM12345 "$TESTOUT")
 	if test -n "$PSK"; then
 		rm "$TESTOUT"

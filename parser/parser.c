@@ -309,7 +309,9 @@ void parser_rt_root(const char *arg, const char *file, int line_no)
 void parser_wordlist(const char *arg, const char *file, int line_no)
 {
 	struct stat wrd_stat;
+#ifdef HAVE_LIBMAGIC
 	const char *target_mime = "text/plain;";
+#endif
 
 
 	if(arg == NULL)
@@ -322,8 +324,10 @@ void parser_wordlist(const char *arg, const char *file, int line_no)
 		w_report_error(arg,file,line_no,__func__,1,0,error);
 	else
 	{
+#ifdef HAVE_LIBMAGIC
 		if(strncmp(get_mime(arg),target_mime,strlen(target_mime)) != 0)
 			report(warning,"\"%s\" is not a \"%s\" file.",arg,target_mime);
+#endif
 
 		if(globals.dict == false)
 		{
@@ -534,7 +538,9 @@ void parser_odb( const char *arg, const char *file, int line_no )
 	size_t odb_len,sep_len,str_len;
 	bool good;
 	struct stat odb_stat;
+#ifdef HAVE_LIBMAGIC
 	const char *target_mime = "text/plain;";
+#endif
 	char *line,*tmp_err_buff,*buff;
 	FILE *db_file;
 
@@ -552,9 +558,10 @@ void parser_odb( const char *arg, const char *file, int line_no )
 		w_report_error(arg,file,line_no,__func__,1,0,error);
 	else
 	{
+#ifdef HAVE_LIBMAGIC
 		if(strncmp(get_mime(arg),target_mime,strlen(target_mime)) != 0)
 			report(info,"\"%s\" is not a \"%s\" file.",arg,target_mime);
-
+#endif
 		odb_len = sizeof(odb);
 		sep_len = strlen(ODB_SEP);
 		tmp_err_buff = malloc((MAX_BUFF+1) * sizeof(char));

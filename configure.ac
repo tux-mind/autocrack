@@ -15,21 +15,20 @@ AC_HEADER_TIOCGWINSZ
 AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 
-
 AC_CHECK_HEADERS([sys/socket.h])
 AC_CHECK_HEADERS([regex.h])
-AC_CHECK_HEADERS([pthread.h])
+AC_CHECK_LIB([pthread],[main])
+AC_CHECK_LIB([curl],[main])
+AC_CHECK_LIB([crypto],[main])
+AC_CHECK_LIB([magic],[main])
 
 debug_default="yes"
-AC_ARG_ENABLE(debug, [  --enable-debug=[no/YES] write debugging symbols and turn off optimization
-													[default=$debug_default]],, enable_debug=$debug_default)
-if test "x$enable_debug" = "xyes"; then
+AC_ARG_ENABLE(debug, [  --enable-debug=[no/YES] write debugging symbols and turn off optimization.],enable_debug=$enableval, enable_debug=$debug_default)
+if test "x$enable_debug" == "xyes"; then
 	CFLAGS="$CFLAGS -ggdb -O0"
-	REDIRECT="&>/dev/null"
 	AC_MSG_RESULT(yes)
 else
 	CFLAGS="$CFLAGS -g -O2 -ffast-math -fomit-frame-pointer -pipe"
-	REDIRECT="1>/dev/null"
 	AC_MSG_RESULT(no)
 fi
 
@@ -48,7 +47,7 @@ if test -n "$JTR"; then
 	echo "Testing john the ripper."
 	TESTOUT=/tmp/john.pot
 	rm -f "$TESTOUT"
-	$JTR --wordlist=test/uword --format=raw-md5 test/hash.md5 --pot="$TESTOUT" $REDIRECT
+	$JTR --wordlist=test/uword --format=raw-md5 test/hash.md5 --pot="$TESTOUT" &>/dev/null 2>/dev/tty
 	if test ! -f "$TESTOUT"; then
 		AC_MSG_WARN([john the ripper test failed. usually you must install it in SYSTEMWIDE mode.])
 		JTR=""
@@ -61,7 +60,7 @@ fi
 if test -n "$COWPATTY"; then
 	TESTOUT=/tmp/cow.out
 	echo "Testing coWPAtty."
-	$COWPATTY -f test/uword -r test/wpa2psk-MOM1.dump -s MOM1 $REDIRECT 1>$TESTOUT
+	$COWPATTY -f test/uword -r test/wpa2psk-MOM1.dump -s MOM1 &>/dev/null 1>$TESTOUT
 	PSK=$( grep -oe "MOM12345" "$TESTOUT" )
 	if test -n "$PSK"; then
 		rm "$TESTOUT"
@@ -79,7 +78,7 @@ fi
 if test -n "$OCLHASHCAT"; then
 	TESTOUT=/tmp/ocl.out
 	echo "Testing oclhashcat-plus."
-	$OCLHASHCAT -m 0 -a 0 -o "$TESTOUT" --outfile-format=3 test/uword test/hash.md5
+	$OCLHASHCAT -m 0 -a 0 -o "$TESTOUT" --outfile-format=3 test/uword test/hash.md5 &>/dev/null 2>/dev/tty
 	PSWD=$(grep -o password "$TESTOUT")
 	if test -n "$PSWD"; then
 		rm "$TESTOUT"
@@ -96,7 +95,7 @@ fi
 if test -n "$PYRIT" ; then
 	TESTOUT=/tmp/pyr.out
 	echo "Testing pyrit."
-	$PYRIT -i test/uword -o "$TESTOUT" -r test/wpa2psk-MOM1.dump -e MOM1 	attack_passthrough
+	$PYRIT -i test/uword -o "$TESTOUT" -r test/wpa2psk-MOM1.dump -e MOM1 	attack_passthrough &>/dev/null 2>/dev/tty
 	PSK=$(grep -o MOM12345 "$TESTOUT")
 	if test -n "$PSK"; then
 		rm "$TESTOUT"

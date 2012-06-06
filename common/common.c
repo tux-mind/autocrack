@@ -1280,6 +1280,7 @@ char *w_fgets_fix(char *string, const char *file, int line_no, const char *calle
 	return string;
 }
 
+#ifdef HAVE_LIBMAGIC
 const char *w_get_mime(const char *arg, const char *file, int line_no)
 {
 	const char *buff;
@@ -1308,6 +1309,7 @@ const char *w_get_mime(const char *arg, const char *file, int line_no)
 	}
 	return (const char*) magic_full;
 }
+#endif
 
 void w_argcpy(const char **dst, const char *arg, size_t max_len, const char *func, const char *file,int line_no)
 {
@@ -1996,8 +1998,9 @@ void destroy_all()
 
 	for(wtmp=globals.wpa_list;wtmp!=NULL;wtmp=wtmp->next,free_wpa(wold))
 		wold=wtmp;
-
+#ifdef HAVE_LIBMAGIC
 	w_get_mime(NULL,__FILE__,__LINE__);
+#endif
 	w_make_wordlist(delete,__FILE__,__LINE__);
 	w_make_hash_file(NONE,__FILE__,__LINE__,__func__);
 	find_genpmk(NULL);
