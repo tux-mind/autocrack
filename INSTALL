@@ -1,0 +1,14 @@
+Autocrack - automatically crack everything throught CPU and GPU
+Copyright (C) 2012  Massimo Dragano <massimo.dragano@gmail.com>
+
+INSTALLATION
+
+simply run:
+./configure
+make
+make install ( as root )
+
+./configre gives you a couple of WARNING and ERROR
+if some external binaries are missing or not properly working.
+gcc will gracefully fail in preprocessing phase
+if some library on your system is missing.

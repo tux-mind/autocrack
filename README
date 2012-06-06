@@ -1,0 +1,12 @@
+Hi tester!
+There is an hidden option:
+-C, --no-cow
+this because cowpatty seems to having trouble with parsing capture files
+with multiple WPA handshakes.
+
+That's all folks!
+Happy Hacking! ;D
+
+ah! ( the usual ballshit )
+this software is write for testing the security of your password and WPA keys,
+don't use it on hash and/or WPA handshakes of other people/company.
