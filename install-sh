@@ -1,2 +1,2 @@
-auoreconf --install
+autoreconf --install
 ./configure
