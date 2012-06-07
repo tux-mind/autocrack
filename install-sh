@@ -1,0 +1,2 @@
+auoreconf --install
+./configure
