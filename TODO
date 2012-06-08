@@ -1,6 +1,6 @@
 [optional]			may be we can support unicode chars...but what is the http POST standard?
 [optional]			make str2up/dn return a pointer to local static buffer. why???
-[optional]			parallelizing option parsing ( must have globals.err_buff mutex lock );
+[optional]			parallelizing option parsing ( must have globals.err_buff mutex lock )
 [low priority]	also compare hash type from john the ripper 'pot' files.
 [low priority] 	WORK_RATIO is not exact, if oclhashcat use permutation attack, him load is very very bigger then othres.
 [low priority] 	start parsing after read all options. ( where store the arguments? or we can reuse getopt/argv  or option_index ?)

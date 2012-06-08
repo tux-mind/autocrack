@@ -563,7 +563,7 @@ PACKAGE_TARNAME='autocrack'
 PACKAGE_VERSION='0.0.1'
 PACKAGE_STRING='autocrack 0.0.1'
 PACKAGE_BUGREPORT='massimo.dragano@gmail.com'
-PACKAGE_URL=''
+PACKAGE_URL='https://github.com/tux-mind/autocrack'
 
 # Factoring default headers for most tests.
 ac_includes_default="\
@@ -604,7 +604,14 @@ ac_includes_default="\
 ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
-MY_CONFDIR
+host_os
+host_vendor
+host_cpu
+host
+build_os
+build_vendor
+build_cpu
+build
 RCRACK
 OCLHASHCAT
 PYRIT
@@ -705,7 +712,8 @@ CFLAGS
 LDFLAGS
 LIBS
 CPPFLAGS
-CPP'
+CPP
+CPPFLAGS'
 
 
 # Initialize some variables set by options.
@@ -1309,6 +1317,10 @@ Program names:
   --program-prefix=PREFIX            prepend PREFIX to installed program names
   --program-suffix=SUFFIX            append SUFFIX to installed program names
   --program-transform-name=PROGRAM   run sed PROGRAM on installed program names
+
+System types:
+  --build=BUILD     configure for building on BUILD [guessed]
+  --host=HOST       cross-compile to build programs to run on HOST [BUILD]
 _ACEOF
 fi
 
@@ -1340,6 +1352,7 @@ Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
 
 Report bugs to <massimo.dragano@gmail.com>.
+autocrack home page: <https://github.com/tux-mind/autocrack>.
 _ACEOF
 ac_status=$?
 fi
@@ -5351,13 +5364,12 @@ fi
 
 if test "x$enable_debug" == "xyes"; then
 	CFLAGS="$CFLAGS -ggdb -O0"
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
+	#AC_MSG_RESULT([yes])
 else
 	CFLAGS="$CFLAGS -g -O2 -ffast-math -fomit-frame-pointer -pipe"
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
+	#AC_MSG_RESULT([no])
 fi
+
 
 
 # Extract the first word of "john", so it can be a program name with args.
@@ -5610,17 +5622,26 @@ fi
 
 
 
+TMPLOG=/tmp/test.log
 
 if test -n "$JTR"; then
-	echo "Testing john the ripper."
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking john the ripper" >&5
+$as_echo_n "checking john the ripper... " >&6; }
 	TESTOUT=/tmp/john.pot
 	rm -f "$TESTOUT"
-	$JTR --wordlist=test/uword --format=raw-md5 test/hash.md5 --pot="$TESTOUT" &>/dev/null 2>/dev/tty
+	$JTR --wordlist=test/uword --format=raw-md5 test/hash.md5 --pot="$TESTOUT" &>"$TMPLOG"
 	if test ! -f "$TESTOUT"; then
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: john the ripper test failed. usually you must install it in SYSTEMWIDE mode." >&5
-$as_echo "$as_me: WARNING: john the ripper test failed. usually you must install it in SYSTEMWIDE mode." >&2;}
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: FAILED" >&5
+$as_echo "FAILED" >&6; }
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: usually you must install it in SYSTEMWIDE mode." >&5
+$as_echo "$as_me: WARNING: usually you must install it in SYSTEMWIDE mode." >&2;}
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: program output:" >&5
+$as_echo "$as_me: WARNING: program output:" >&2;}
+		cat "$TMPLOG"
 		JTR=""
 	else
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: success" >&5
+$as_echo "success" >&6; }
 		rm "$TESTOUT"
 	fi
 else
@@ -5628,19 +5649,20 @@ else
 $as_echo "$as_me: WARNING: Cannot found john the ripper, many features will be disabled." >&2;}
 fi
 if test -n "$COWPATTY"; then
-	TESTOUT=/tmp/cow.out
-	echo "Testing coWPAtty."
-	$COWPATTY -f test/uword -r test/wpa2psk-MOM1.dump -s MOM1 &>/dev/null 1>$TESTOUT
-	PSK=$( grep -oe "MOM12345" "$TESTOUT" )
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking coWPAtty" >&5
+$as_echo_n "checking coWPAtty... " >&6; }
+	$COWPATTY -f test/uword -r test/wpa2psk-MOM1.dump -s MOM1 &>"$TMPLOG"
+	PSK=$( grep -oe "MOM12345" "$TMPLOG")
 	if test -n "$PSK"; then
-		rm "$TESTOUT"
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: success" >&5
+$as_echo "success" >&6; }
 	else
-		if test -f "$TESTOUT"; then
-			rm "$TESTOUT"
-		fi
 		COWPATTY=""
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Cowpatty test failed." >&5
-$as_echo "$as_me: WARNING: Cowpatty test failed." >&2;}
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: FAILED" >&5
+$as_echo "FAILED" >&6; }
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: program ouput:" >&5
+$as_echo "$as_me: WARNING: program ouput:" >&2;}
+		cat "$TMPLOG"
 	fi
 else
 	COWPATTY=""
@@ -5649,18 +5671,24 @@ $as_echo "$as_me: WARNING: Cannot found cowpatty, CPU wpa rainbowtable attack wi
 fi
 if test -n "$OCLHASHCAT"; then
 	TESTOUT=/tmp/ocl.out
-	echo "Testing oclhashcat-plus."
-	$OCLHASHCAT -m 0 -a 0 -o "$TESTOUT" --outfile-format=3 test/uword test/hash.md5 &>/dev/null 2>/dev/tty
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking oclhashcat-plus" >&5
+$as_echo_n "checking oclhashcat-plus... " >&6; }
+	$OCLHASHCAT -m 0 -a 0 -o "$TESTOUT" --outfile-format=3 test/uword test/hash.md5 &>"$TMPLOG"
 	PSWD=$(grep -o password "$TESTOUT")
 	if test -n "$PSWD"; then
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: success" >&5
+$as_echo "success" >&6; }
 		rm "$TESTOUT"
 	else
 		if test -f "$TESTOUT"; then
 			rm "$TESTOUT"
 		fi
 		OCLHASHCAT=""
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: oclhashcat-plus test failed." >&5
-$as_echo "$as_me: WARNING: oclhashcat-plus test failed." >&2;}
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: FAILED" >&5
+$as_echo "FAILED" >&6; }
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: program output is:" >&5
+$as_echo "$as_me: WARNING: program output is:" >&2;}
+		cat "$TMPLOG"
 	fi
 else
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: oclhashcat-plus not found." >&5
@@ -5668,25 +5696,34 @@ $as_echo "$as_me: WARNING: oclhashcat-plus not found." >&2;}
 fi
 if test -n "$PYRIT" ; then
 	TESTOUT=/tmp/pyr.out
-	echo "Testing pyrit."
-	$PYRIT -i test/uword -o "$TESTOUT" -r test/wpa2psk-MOM1.dump -e MOM1 	attack_passthrough &>/dev/null 2>/dev/tty
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking pyrit." >&5
+$as_echo_n "checking pyrit.... " >&6; }
+	$PYRIT -i test/uword -o "$TESTOUT" -r test/wpa2psk-MOM1.dump -e MOM1 	attack_passthrough &>"$TMPLOG"
 	PSK=$(grep -o MOM12345 "$TESTOUT")
 	if test -n "$PSK"; then
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: success" >&5
+$as_echo "success" >&6; }
 		rm "$TESTOUT"
 	else
 		if test -f "$TESTOUT"; then
 			rm "$TESTOUT"
 		fi
 		PYRIT=""
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: pyrit test failed." >&5
-$as_echo "$as_me: WARNING: pyrit test failed." >&2;}
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: FAILED" >&5
+$as_echo "FAILED" >&6; }
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: program output is:" >&5
+$as_echo "$as_me: WARNING: program output is:" >&2;}
+		cat "$TMPOUT"
 	fi
 else
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: cannot find pyrit." >&5
 $as_echo "$as_me: WARNING: cannot find pyrit." >&2;}
 fi
 if test -n "$RCRACK"; then
-	echo "Testing rcracki_mt."
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking rcracki_mt." >&5
+$as_echo_n "checking rcracki_mt.... " >&6; }
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: FUNCTION NOT AVAILABLE" >&5
+$as_echo "FUNCTION NOT AVAILABLE" >&6; }
 else
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Cannot find rcracki_mt." >&5
 $as_echo "$as_me: WARNING: Cannot find rcracki_mt." >&2;}
@@ -5695,9 +5732,177 @@ fi
 if test -z "$OCLHASHCAT$PYRIT$JTR$RCRACK$COWPATTY" ; then
 	as_fn_error $? "Hei guy! seems that you havn't anything installed on your machine! Please install al least one of the programs above." "$LINENO" 5
 fi
-MY_CONFDIR="$sysconfdir/autocrack"
+oldprefix="$prefix" # something in the next function set prefix to NONE
+# Make sure we can run config.sub.
+$SHELL "$ac_aux_dir/config.sub" sun4 >/dev/null 2>&1 ||
+  as_fn_error $? "cannot run $SHELL $ac_aux_dir/config.sub" "$LINENO" 5
 
-#AC_DEFINE_UNQUOTED([CONFDIR],["$MY_CONFDIR"],"config dir")
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking build system type" >&5
+$as_echo_n "checking build system type... " >&6; }
+if ${ac_cv_build+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_build_alias=$build_alias
+test "x$ac_build_alias" = x &&
+  ac_build_alias=`$SHELL "$ac_aux_dir/config.guess"`
+test "x$ac_build_alias" = x &&
+  as_fn_error $? "cannot guess build type; you must specify one" "$LINENO" 5
+ac_cv_build=`$SHELL "$ac_aux_dir/config.sub" $ac_build_alias` ||
+  as_fn_error $? "$SHELL $ac_aux_dir/config.sub $ac_build_alias failed" "$LINENO" 5
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_build" >&5
+$as_echo "$ac_cv_build" >&6; }
+case $ac_cv_build in
+*-*-*) ;;
+*) as_fn_error $? "invalid value of canonical build" "$LINENO" 5;;
+esac
+build=$ac_cv_build
+ac_save_IFS=$IFS; IFS='-'
+set x $ac_cv_build
+shift
+build_cpu=$1
+build_vendor=$2
+shift; shift
+# Remember, the first character of IFS is used to create $*,
+# except with old shells:
+build_os=$*
+IFS=$ac_save_IFS
+case $build_os in *\ *) build_os=`echo "$build_os" | sed 's/ /-/g'`;; esac
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking host system type" >&5
+$as_echo_n "checking host system type... " >&6; }
+if ${ac_cv_host+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test "x$host_alias" = x; then
+  ac_cv_host=$ac_cv_build
+else
+  ac_cv_host=`$SHELL "$ac_aux_dir/config.sub" $host_alias` ||
+    as_fn_error $? "$SHELL $ac_aux_dir/config.sub $host_alias failed" "$LINENO" 5
+fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_host" >&5
+$as_echo "$ac_cv_host" >&6; }
+case $ac_cv_host in
+*-*-*) ;;
+*) as_fn_error $? "invalid value of canonical host" "$LINENO" 5;;
+esac
+host=$ac_cv_host
+ac_save_IFS=$IFS; IFS='-'
+set x $ac_cv_host
+shift
+host_cpu=$1
+host_vendor=$2
+shift; shift
+# Remember, the first character of IFS is used to create $*,
+# except with old shells:
+host_os=$*
+IFS=$ac_save_IFS
+case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
+
+
+ # --------------------------------------------
+case "$prefix:$ac_default_prefix" in
+  NONE:/usr/local)
+    result=""
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking default prefix path" >&5
+$as_echo_n "checking default prefix path... " >&6; }
+    case "${target_os}" in
+      *cygwin* | *mingw* | *uwin* | *djgpp | *emx* )
+        if test "${host_os}" = "${target_os}" ; then
+           ac_default_prefix="/programs"
+           result="(win/dos target)"
+        else
+           case "$PATH" in
+              *:/usr/local/cross-tools/$target_alias/bin:*)
+                  ac_default_prefix="/usr/local/cross-tools/$target_alias" ;;
+              *:/usr/local/$target_alias/bin:*)
+                  ac_default_prefix="/usr/local/$target_alias" ;;
+              *:/usr/local/$target_cpu-$target_os/bin:*)
+                  ac_default_prefix="/usr/local/$target_cpu-$target_os" ;;
+              *)
+                  ac_default_prefix="/programs" ;;
+           esac
+           result="(win/dos cross-compiler)"
+        fi
+    ;;
+    esac
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_default_prefix $result" >&5
+$as_echo "$ac_default_prefix $result" >&6; }
+  ;;
+esac
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking default prefix system" >&5
+$as_echo_n "checking default prefix system... " >&6; }
+result="$prefix" ; test "$result" = "NONE" && result="$ac_default_prefix"
+case ${result} in
+  /programs | /programs/*) result="is win-/programs"
+     # on win/dos, .exe .dll and .cfg live in the same directory
+     libdir=`echo $libdir |sed -e 's:^..exec_prefix./lib$:${bindir}:'`
+     sbindir=`echo $sbindir |sed -e 's:^..exec_prefix./sbin$:${libdir}:'`
+     sysconfdir=`echo $sysconfdir |sed -e 's:^..prefix./etc$:${sbindir}:'`
+     libexecdir=`echo $libexecdir |sed -e 's:/libexec$:/system:'`
+     # help-files shall be set with --infodir, docprefix is datadir
+     docprefix="${datadir}"
+     mandir=`echo $mandir \
+                             |sed -e 's:^..prefix./man$:${datadir}/info:'`
+     includedir=`echo $includedir \
+                |sed -e 's:^..prefix./include$:${datadir}/include:'`
+     # other state files (but /etc) are moved to datadir
+     sharedstatedir=`echo $sharedstatedir \
+                     |sed -e 's:^..prefix./com$:${datadir}/default:'`
+     localstatedir=`echo $localstatedir \
+                     |sed -e 's:^..prefix./var$:${datadir}/current:'`
+  ;;
+  /usr) result="is /usr-shipped"
+     # doc files are left at prefix
+     docprefix="${prefix}"
+     # state files go under /top
+     sysconfdir=`echo $sysconfdir |sed -e 's:^..prefix./etc$:/etc:'`
+     sharedstatedir=`echo $sharedstatedir \
+                     |sed -e 's:^..prefix./com$:/etc/default:'`
+     # $prefix/var is going to end up in /var/lib
+     localstatedir=`echo $localstatedir \
+                     |sed -e 's:^..prefix./var$:/var/lib:'`
+  ;;
+  /opt | /opt/*) result="is /opt-package"
+     # state files go under /top/prefix
+     sysconfdir=`echo $sysconfdir \
+                     |sed -e 's:^..prefix./etc$:/etc${prefix}:'`
+     sharedstatedir=`echo $sharedstatedir \
+                     |sed -e 's:^..prefix./com$:/etc/default${prefix}:'`
+     # $prefix/var is going to to be /var$prefix... once again
+     localstatedir=`echo $localstatedir \
+                     |sed -e 's:^..prefix./var$:/var${prefix}:'`
+     # doc files are left at prefix
+     docprefix="${prefix}"
+  ;;
+  *) result="is /local-package"
+     # doc files are moved from prefix down to datadir
+     docprefix="${datadir}"
+     mandir=`echo $mandir \
+                     |sed -e 's:^..prefix./man$:${datadir}/man:'`
+     infodir=`echo $infodir \
+                     |sed -e 's:^..prefix./infodir$:${datadir}/info:'`
+     # never use $prefix/com - that is no good idea
+     sharedstatedir=`echo $sharedstatedir \
+                     |sed -e 's:^..prefix./com$:${sysconfdir}/default:'`
+     sysconfdir=`echo $sysconfdir |sed -e 's:^..prefix./etc$:/etc:'`
+  ;;
+esac
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $result" >&5
+$as_echo "$result" >&6; }
+# --------------------------------------------------------
+
+prefix="$oldprefix" # so we restore it to prefious value.
+CONFDIR="$prefix$sysconfdir/autocrack"
+
+cat >>confdefs.h <<_ACEOF
+#define CONFDIR "$CONFDIR"
+_ACEOF
+
 # if you edit the next line remember that if you provide less then (sizeof(struct _bins)/sizeof(char *)) strings, probably the function parser_path will recieve a SIGSEGV signal while try to evaluate the legth of a string that you havn't give..
 
 cat >>confdefs.h <<_ACEOF
@@ -6302,7 +6507,8 @@ $config_headers
 Configuration commands:
 $config_commands
 
-Report bugs to <massimo.dragano@gmail.com>."
+Report bugs to <massimo.dragano@gmail.com>.
+autocrack home page: <https://github.com/tux-mind/autocrack>."
 
 _ACEOF
 cat >>$CONFIG_STATUS <<_ACEOF || ac_write_fail=1
