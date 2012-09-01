@@ -1,5 +1,11 @@
 Autocrack - automatically crack everything throught CPU and GPU
 Copyright (C) 2012  Massimo Dragano <massimo.dragano@gmail.com>
 
+2012-08-28	Massimo Dragano <massimo.dragano@gmail.com>
+	*	configure.ac:	hide rcracki_mt checking.
+2012-08-27	Massimo Dragano <massimo.dragano@gmail.com>
+	*	common.c:			auto-kill if cannot terminate some childs.
+	* autocrack.c:	double parse options for exit immediatly if user ask for help or infos.
+	* All:					minor bug-fixes
 2012-06-04	Massimo Dragano	<massimo.dragano@gmail.com>
-	* : Frst release.
+	* : First release.

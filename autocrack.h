@@ -35,5 +35,5 @@
 
 //prototypes
 void option_handler(int,char**);
-void usage(int,char*);
+void usage(char*);
 

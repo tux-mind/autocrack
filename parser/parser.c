@@ -422,29 +422,26 @@ static void parser_online_cleanup(void *arg)
 void *parser_online(void *garbage)
 {
 	int sockfd,val;
-	struct hostent *google_ent=NULL;
-	struct sockaddr_in google_addr;
-
 	sockfd = -1;
-
+	struct addrinfo *result, hints;
 	pthread_cleanup_push(parser_online_cleanup, &sockfd); // call parser_online_cleanup() if someone want to kill us.
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
-	// gethostbyname allocate dynamic memory, so we have to wait it's end or that memory will be lost.
-	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE,NULL);
-	if((google_ent = gethostbyname("google.com")) != NULL)
+
+	memset(&hints,0,sizeof(struct addrinfo));
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+
+	if(getaddrinfo("google.com","80",&hints,&result) == 0)
 	{
-		pthread_setcancelstate(PTHREAD_CANCEL_ENABLE,NULL);
-		if((sockfd = socket(google_ent->h_addrtype,SOCK_STREAM,IPPROTO_TCP)) != -1)
+		/* try to connect only to the first addrinfo */
+		if((sockfd = socket(result->ai_family,result->ai_socktype,result->ai_protocol)) != -1)
 		{
 			val = 1;
-			if(setsockopt(sockfd,SOL_SOCKET,SO_REUSEADDR, (char *) &val, sizeof(val)) == 0 && setsockopt(sockfd,IPPROTO_TCP,TCP_NODELAY, (char *) &val, sizeof(val)) == 0)
+			if(result->ai_protocol == IPPROTO_TCP)
+				setsockopt(sockfd,result->ai_protocol,TCP_NODELAY, (char *) &val, sizeof(val));
+			if(setsockopt(sockfd,SOL_SOCKET,SO_REUSEADDR, (char *) &val, sizeof(val)) == 0)
 			{
-				memset(&google_addr,0,sizeof(struct sockaddr_in));
-				google_addr.sin_family = google_ent->h_addrtype;
-				memcpy(&(google_addr.sin_addr), google_ent->h_addr, google_ent->h_length);
-				google_addr.sin_port = htons(80);
-
-				if(connect(sockfd,(struct sockaddr *) &google_addr,sizeof(google_addr)) == 0)
+				if(connect(sockfd,result->ai_addr,result->ai_addrlen) == 0)
 					val = 0;
 				else
 					val=errno;
@@ -456,12 +453,9 @@ void *parser_online(void *garbage)
 			val=errno;
 	}
 	else
-	{
-		val=-1;// errno is always > 0
-		pthread_setcancelstate(PTHREAD_CANCEL_ENABLE,NULL);
-	}
+		val=-1;
 
-	// execute celanup function ( if don't do this a extra '{' is insert by pthread_cleanup_push )
+	// execute celanup function ( if don't do this an extra '{' is insert by pthread_cleanup_push )
 	pthread_cleanup_pop(1);
 	pthread_exit((void *) val);
 }

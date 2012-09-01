@@ -208,19 +208,22 @@ else
 	AC_MSG_WARN([cannot find pyrit.])
 fi
 if test -n "$RCRACK"; then
-	AC_MSG_CHECKING([rcracki_mt.])
-	AC_MSG_RESULT([FUNCTION NOT AVAILABLE])
+	#AC_MSG_CHECKING([rcracki_mt])
+	#AC_MSG_RESULT([FUNCTION NOT AVAILABLE])
+	echo "TODO: rcracki_mt checking"
 else
 	AC_MSG_WARN([Cannot find rcracki_mt.])
+fi
+
+if test -f "$TMPLOG" ; then
+	rm "$TMPLOG"
 fi
 
 if test -z "$OCLHASHCAT$PYRIT$JTR$RCRACK$COWPATTY" ; then
 	AC_MSG_ERROR([Hei guy! seems that you havn't anything installed on your machine! Please install al least one of the programs above.])
 fi
-oldprefix="$prefix" # something in the next function set prefix to NONE
 AC_SET_DEFAULT_PATHS_SYSTEM
-prefix="$oldprefix" # so we restore it to prefious value.
-CONFDIR="$prefix$sysconfdir/autocrack"
+CONFDIR="$ac_default_prefix$sysconfdir/autocrack"
 AC_DEFINE_UNQUOTED([CONFDIR],"$CONFDIR","config dir")
 # if you edit the next line remember that if you provide less then (sizeof(struct _bins)/sizeof(char *)) strings, probably the function parser_path will recieve a SIGSEGV signal while try to evaluate the legth of a string that you havn't give..
 AC_DEFINE_UNQUOTED([BINS],[	{		"$JTR",		"$COWPATTY",		"$OCLHASHCAT",		"$PYRIT",		"$RCRACK"	}],"external binaries")

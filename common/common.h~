@@ -1,0 +1,137 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fnmatch.h>
+#include <dirent.h>
+#include <ctype.h>
+#include <sys/select.h>
+#include <errno.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <math.h>
+#include <libgen.h>
+#include <regex.h>
+#include <sys/stat.h>
+#include <magic.h>
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+//typedefs
+#if (__BORLANDC__ <= 0x460) || !defined(__cplusplus) 							// Define boolean type
+  typedef enum { false, true } bool;
+#endif
+
+#define MAX_BUFF 				(PATH_MAX)
+#define MAX_LINE				255
+#define MAX_HASH				1024
+#define MAX_ODB					255
+#define ODB_RCRD				6																					// number of records in odb structure
+#ifndef DEF_RT_ROOT
+	#define DEF_RT_ROOT		"./rt"
+#endif
+#ifndef DEF_WRDLST
+	#define DEF_WRDLST			"./wordlist"
+#endif
+
+enum _log_level
+{
+	quiet,
+	error,
+	warning,
+	info,
+	verbose,
+	verbose2,
+	verbose3,
+	debug
+};
+
+#define N_TYPE 11
+
+enum _type
+{
+	NONE,
+	LM,
+	MD5,
+	MYSQL323,
+	MYSQL,
+	NT,
+	SHA1,
+	SHA256,
+	SHA384,
+	SHA512,
+	UNKNOWN
+};
+
+static const char* type_str[] = 
+{
+	"NONE",
+	"LM",
+	"MD5",
+	"MYSQL323",
+	"MYSQL",
+	"NT",
+	"SHA1",
+	"SHA256",
+	"SHA384",
+	"SHA512",
+	"UNKNOWN"
+};
+
+static const char* type_rgx[] = 
+{
+	".*",
+	"^[0-9A-Fa-f]{32}$",
+	"^[0-9A-Fa-f]{32}$",
+	"^[0-9A-Fa-f]{16}$",
+	"^[0-9A-Fa-f]{40}$",
+	"^[0-9A-Fa-f]{32}$",
+	"^[0-9A-Fa-f]{40}$",
+	"^[0-9A-Fa-f]{64}$",
+	"^[0-9A-Fa-f]{98}$",
+	"^[0-9A-Fa-f]{128}$",
+	".*"
+};
+
+typedef struct _hash
+{
+	unsigned int id;
+	enum _type type;
+	char *hash,*plain;
+	struct _hash *next;
+} _hash;
+
+struct _bins
+{
+	char 	*jtr,
+				*cow,
+				*pyr,
+				*rcrack;
+};
+
+// defining online_db struct
+typedef struct _odb
+{
+	char* host;
+	enum _type type;
+	char *form,*input,*option,*op_val;
+	/*--more to come--*/
+	struct _odb *next;
+} odb;
+
+struct _globals {
+	enum _log_level log_level;
+	bool online,rain,dict,gpu;
+	char *err_buff;
+	const char *essid,*rt_root,*outfile,*pcap,*wordlist;
+	struct _bins bins;
+	odb *odb;
+	_hash *hash_list;
+};
+
+// prototypes
+void destroy_all();
+

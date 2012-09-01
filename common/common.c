@@ -1387,7 +1387,7 @@ static void *thread_execv(void *arg)
 	{
 	 	newout = open(outfile, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP );
 		dup2(newout,STDOUT_FILENO);
-		// print program stderr only if globals.log_leve == debug
+		// print program stderr only if globals.log_level == debug
 		if(globals.log_level < debug)
 			dup2(newout,STDERR_FILENO);
 		close(newout);
@@ -1927,8 +1927,11 @@ void destroy_all()
 	struct t_info *ttmp=NULL,*told=NULL;
 	_wpa *wold=NULL,*wtmp=NULL;
 	char **ptr;
-	int i,n_bins;
+	int i,n_bins,n_sleep=0;
+	bool force_shutdown = false;
 
+	//use i for store maximum loop count
+	i = TKILL_TIMEOUT * 100;
 	// first of all kill our childs
 	for(ttmp=globals.tpool;ttmp!=NULL;)
 	{
@@ -1937,11 +1940,17 @@ void destroy_all()
 		w_unbind_thr(ttmp);
 		if(ttmp->thread!=0)
 		{
-			pthread_cancel(ttmp->thread);
-			while(pthread_kill(ttmp->thread,0)==0)
+			for(pthread_cancel(ttmp->thread);pthread_kill(ttmp->thread,0)==0 && n_sleep < i;n_sleep++)
 				usleep(10);
+			if(n_sleep == i)
+			{
+				snprintf(globals.err_buff,MAX_BUFF,"could not kill child with LWPID=%lu.",(unsigned long int) ttmp->thread);
+				w_report_error(globals.err_buff, __FILE__, __LINE__, __func__, 0, 0, error);
+				force_shutdown = true;
+			}
+			else
+				pthread_join(ttmp->thread,NULL);
 		}
-		pthread_join(ttmp->thread,NULL);
 		told=ttmp;
 		ttmp=ttmp->next;
 		free((void *) told);
@@ -1951,9 +1960,9 @@ void destroy_all()
 
 	n_bins = sizeof(struct _bins)/sizeof(char*);
 
-	// destroy err_buff , which surely exist
-	free((void *) globals.err_buff);
-	// destroy other (char *) if they exist
+	// destroy (char *) if they exist
+	if(globals.err_buff!= NULL)
+		free((void *) globals.err_buff);
 	if(globals.essid != NULL)
 		free((void *) globals.essid);
 	if(globals.rt_root != NULL)
@@ -2005,12 +2014,25 @@ void destroy_all()
 	w_make_hash_file(NONE,__FILE__,__LINE__,__func__);
 	find_genpmk(NULL);
 
+	//reset globals in order to prevent double frees if recalled
+	i = globals.log_level;
+	memset(&globals,0,sizeof(struct _globals));
+	globals.log_level = i;
+
+	//if a child cannot be killed, suicide
+	if(force_shutdown == true)
+	{
+		w_report_error("karakiri for make sure killing childs.",__FILE__,__LINE__,__func__,0,0,verbose);
+		raise(SIGTERM); // kaboom
+	}
 	return;
 }
 
 void signal_handler(int signum)
 {
 	w_report_error("recieved SIGINT.",__FILE__,__LINE__,__func__,0,1,error);
+	//if we are here after a 'fatal' report something orrible is happend, so suicide.
+	raise(SIGTERM);
 }
 
 #include "common_macro.h"

@@ -160,6 +160,7 @@ typedef bool _Bool;
 #define NET_CHK_TIMEOUT	15000 // ms
 #define BOT_RETRY				3
 #define WORK_RATIO			2.0																				// (work for GPU) / (work for cpu)
+#define TKILL_TIMEOUT		100 // ms
 #ifndef DEF_RT_ROOT
 	#define DEF_RT_ROOT		"rt"
 #endif

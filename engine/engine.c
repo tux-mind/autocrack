@@ -294,13 +294,17 @@ void rt_crack()
 		report_error("starting rainbowtable attack against hashes.",0,0,info);
 		rain_hash_cpu_crack();
 	}
-	if((wtmp=globals.wpa_list)!=NULL && globals.bins.cow != NULL)
+	//find the first handshake with a valid genpmk file.
+	for(wtmp=globals.wpa_list;wtmp!=NULL && wtmp->genpmk==NULL;wtmp=wtmp->next);
+	if(wtmp!=NULL && globals.bins.cow != NULL)
+	{
 		report_error("starting rainbowtable attack against wpa handshakes.",0,0,info);
-	else
-		wtmp = NULL;
-	for(;wtmp!=NULL;wtmp=wtmp->next)
-		if(wtmp->genpmk!=NULL)
-			rain_wpa_cpu_crack(wtmp);
+		//skip the first check.
+		rain_wpa_cpu_crack(wtmp);
+		for(wtmp=wtmp->next;wtmp!=NULL;wtmp=wtmp->next)
+			if(wtmp->genpmk!=NULL)
+				rain_wpa_cpu_crack(wtmp);
+	}
 	return;
 }
 

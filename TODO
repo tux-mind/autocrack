@@ -6,4 +6,7 @@
 [low priority] 	start parsing after read all options. ( where store the arguments? or we can reuse getopt/argv  or option_index ?)
 [low priority] 	add support for pwdump and lst files.
 [normal]				must add support for md5 subtypes for cracking vBullettin, joomla and more md5 hashes.
+[normal]				pyrit crack using GPU and CPU, how handle this ?
+[normal]				add permutation attack support ( will be silently started if no results are founded? )
 [high priority]	test praser_ocl ( oclhashcat not working on workstation ).
+[high priority]	pthread_mutex_lock called by exit() ??

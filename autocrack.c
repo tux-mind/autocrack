@@ -70,145 +70,201 @@ void option_handler(int argc, char *argv[])
 	};
 
 	int option_index, c;
-	bool bad_option;
+	bool bad_option,exit_now;
 
 	globals.tpool = malloc(sizeof(struct t_info));
 	pthread_create(&(globals.tpool->thread), NULL, P_online, NULL);
 
 	option_index = 0;
-	bad_option=false;
+	exit_now = bad_option = false;
 	c = getopt_long(argc, argv, "vqDH:t:i:o:c:w:e:R:O:hlrdgCJ", long_options, &option_index);
-
-	while(c!=-1 && bad_option==false)
+	if(c == -1) // no option given, threat as "--help"
 	{
-		switch(c)
+		usage(argv[0]);
+		exit_now = true;
+	}
+	else
+	{
+		//parsing options, thus to handle special cases like help and print info without waste CPU time for other options.
+		while(c!=-1 && bad_option==false && exit_now == false)
 		{
-			case 0:
-				break;
-
-			case 'v':
-				if( globals.log_level < verbose3 )
-					globals.log_level++;
-				else if( globals.log_level == debug )
-				{
-					report_error("already in debug mode.",0,0,warning);
-				}
-				else if( globals.log_level == verbose3 )
-				{
-					report_error("maximum verbose level reached.",0,0,info);
-					report_error("use --debug or -D if you want more output",0,0,info);
-				}
-
-				break;
-
-			case 'q':
-				if(globals.log_level > info)
-					globals.log_level -= info; // keep the previous verbosity offset
-				else
-					globals.log_level = quiet;
-				break;
-
-			case 'D':
-				globals.log_level = debug;
-				break;
-
-			case 'H':
-				add_hash(NONE,optarg);
-				break;
-
-			case 't':
-				if( strlen(optarg) == 4 && (!strncmp(optarg,"list",4) || !strncmp(optarg,"LIST",4)))
-					print_type_list();
-				else
-					add_hash(P_type(optarg),NULL);
-				break;
-
-			case 'i':
-				P_infile(optarg);
-				break;
-
-			case 'o':
-				P_outfile(optarg);
-				break;
-
-			case 'c':
-				P_capture(optarg);
-				break;
-
-			case 'w':
-				P_wordlist(optarg);
-				break;
-
-			case 'e':
-				P_essid(optarg);
-				break;
-
-			case 'R':
-				if(globals.rain==true)
-					P_rt_root(optarg);
-				break;
-			case 'O':
-				if(globals.online == true)
-					P_odb(optarg);
-				break;
-
-			case 'h':
-				usage(EXIT_SUCCESS,argv[0]);
-				break;
-
-			case 'l':
-				globals.online = false;
-				report_error("switching OFF all online features.",0,0,verbose);
-				break;
-
-			case 'r':
-				globals.rain = false;
-				report_error("switching OFF rainbowtable features.",0,0,verbose);
-				break;
-
-			case 'd':
-				globals.dict = false;
-				report_error("switching OFF dictionary features.",0,0,verbose);
-				break;
-
-			case 'g':
-				globals.gpu = false;
-				report_error("switching OFF GPU features.",0,0,verbose);
-				break;
-
-			case 'C':
-				if(globals.bins.cow!=NULL)
-					free((void *) globals.bins.cow);
-				globals.bins.cow = NULL;
-				report_error("use this function only for testing.",0,0,warning);
-				break;
-
-			case 'J':
-				if(globals.bins.jtr!=NULL)
-					free((void *) globals.bins.jtr);
-				globals.bins.jtr = NULL;
-				report_error("use this function only for testing.",0,0,warning);
-				break;
-
-			default:
-				bad_option=true;
+			switch(c)
+			{
+				case 't':
+					if( strlen(optarg) == 4 && (!strncmp(optarg,"list",4) || !strncmp(optarg,"LIST",4)))
+					{
+						exit_now = true;
+						print_type_list();
+					}
+					break;
+				case 'h':
+					usage(argv[0]);
+					exit_now = true;
+					break;
+				case 'H':
+				case 'i':
+				case 'o':
+				case 'c':
+				case 'w':
+				case 'e':
+				case 'R':
+				case 'l':
+				case 'r':
+				case 'd':
+				case 'g':
+				case 'v':
+				case 'q':
+				case 'D':
+				case 'O':
+				case 'C':
+				case 'J':
+				case 0:
+					break;
+				default:
+					bad_option = true;
+			}
+			c = getopt_long(argc, argv, "vqDH:t:i:o:c:w:e:R:O:hlrdgCJ", long_options, &option_index);
 		}
+
+		option_index = 0;
 		c = getopt_long(argc, argv, "vqDH:t:i:o:c:w:e:R:O:hlrdgCJ", long_options, &option_index);
+		while(c!=-1 && bad_option==false && exit_now == false)
+		{
+			switch(c)
+			{
+				case 0:
+					break;
+
+				case 'v':
+					if( globals.log_level < verbose3 )
+						globals.log_level++;
+					else if( globals.log_level == debug )
+					{
+						report_error("already in debug mode.",0,0,warning);
+					}
+					else if( globals.log_level == verbose3 )
+					{
+						report_error("maximum verbose level reached.",0,0,info);
+						report_error("use --debug or -D if you want more output",0,0,info);
+					}
+
+					break;
+
+				case 'q':
+					if(globals.log_level > info)
+						globals.log_level -= info; // keep the previous verbosity offset
+					else
+						globals.log_level = quiet;
+					break;
+
+				case 'D':
+					globals.log_level = debug;
+					break;
+
+				case 'H':
+					add_hash(NONE,optarg);
+					break;
+
+				case 't':
+					add_hash(P_type(optarg),NULL);
+					break;
+
+				case 'i':
+					P_infile(optarg);
+					break;
+
+				case 'o':
+					P_outfile(optarg);
+					break;
+
+				case 'c':
+					P_capture(optarg);
+					break;
+
+				case 'w':
+					P_wordlist(optarg);
+					break;
+
+				case 'e':
+					P_essid(optarg);
+					break;
+
+				case 'R':
+					if(globals.rain==true)
+						P_rt_root(optarg);
+					break;
+				case 'O':
+					if(globals.online == true)
+						P_odb(optarg);
+					break;
+
+				case 'l':
+					globals.online = false;
+					report_error("switching OFF all online features.",0,0,verbose);
+					break;
+
+				case 'r':
+					globals.rain = false;
+					report_error("switching OFF rainbowtable features.",0,0,verbose);
+					break;
+
+				case 'd':
+					globals.dict = false;
+					report_error("switching OFF dictionary features.",0,0,verbose);
+					break;
+
+				case 'g':
+					globals.gpu = false;
+					report_error("switching OFF GPU features.",0,0,verbose);
+					break;
+
+				case 'C':
+					if(globals.bins.cow!=NULL)
+						free((void *) globals.bins.cow);
+					globals.bins.cow = NULL;
+					report_error("use this function only for testing.",0,0,warning);
+					break;
+
+				case 'J':
+					if(globals.bins.jtr!=NULL)
+						free((void *) globals.bins.jtr);
+					globals.bins.jtr = NULL;
+					report_error("use this function only for testing.",0,0,warning);
+					break;
+			}
+			c = getopt_long(argc, argv, "vqDH:t:i:o:c:w:e:R:O:hlrdgCJ", long_options, &option_index);
+		}
+		//option check
+		if( exit_now == false && (
+			(globals.rain == false && globals.dict == false && globals.online == false) ||
+			(globals.hash_list == NULL && globals.wpa_list == NULL )))
+				bad_option = true; // parser functions have yet printed something
 	}
 
-	// fix missing option and other stuff
-	P_hash_list();
-	P_wpa_list();
-	P_defaults();
+	//don't wait for online check if we are going to exit
+	if((bad_option | exit_now ) == true)
+		globals.online = false;
 
-	if(globals.online==false || bad_option == true) // if user disable network features or a problem shut it off.
+	if(globals.online==false) // if user disable network features or a problem shut it off.
 	{
 		if(pthread_kill(globals.tpool->thread,0) == 0) // thread is running
 			pthread_cancel(globals.tpool->thread);
+		if((bad_option | exit_now ) == false)
+		{
+			// fix missing option and other stuff if we'll keep going
+			P_hash_list();
+			P_wpa_list();
+			P_defaults();
+		}
 		pthread_join(globals.tpool->thread,NULL);
 	}
 	else
 	{
+		// fix missing option and other stuff, stealing a little extra CPU time from online check
+		P_hash_list();
+		P_wpa_list();
+		P_defaults();
+
 		for(option_index=0;pthread_kill(globals.tpool->thread,0) == 0 && option_index<NET_CHK_TIMEOUT;option_index++)
 			usleep(1000);
 		if(option_index < NET_CHK_TIMEOUT)
@@ -234,13 +290,21 @@ void option_handler(int argc, char *argv[])
 	}
 	free(globals.tpool);
 	globals.tpool=NULL;
-
-	if(bad_option==true)
-		usage(EXIT_FAILURE,argv[0]);
+	if(bad_option == true)
+	{
+		usage(argv[0]);
+		destroy_all();
+		exit(EXIT_FAILURE);
+	}
+	else if(exit_now == true)
+	{
+		destroy_all();
+		exit(EXIT_SUCCESS);
+	}
 	return;
 }
 
-void usage(int ret, char *bin_name)
+void usage(char *bin_name)
 {
 	int i;
 	char  *developers[] = DEVELOPERS ,
@@ -281,6 +345,4 @@ void usage(int ret, char *bin_name)
 	for(i=0;developers[i] != NULL;i++)
 		printf("\n\t\t%s",developers[i]);
 	printf("\n");
-	destroy_all();
-	exit(ret);
 }
