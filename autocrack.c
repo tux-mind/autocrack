@@ -72,9 +72,6 @@ void option_handler(int argc, char *argv[])
 	int option_index, c;
 	bool bad_option,exit_now;
 
-	globals.tpool = malloc(sizeof(struct t_info));
-	pthread_create(&(globals.tpool->thread), NULL, P_online, NULL);
-
 	option_index = 0;
 	exit_now = bad_option = false;
 	c = getopt_long(argc, argv, "vqDH:t:i:o:c:w:e:R:O:hlrdgCJ", long_options, &option_index);
@@ -125,6 +122,13 @@ void option_handler(int argc, char *argv[])
 			}
 			c = getopt_long(argc, argv, "vqDH:t:i:o:c:w:e:R:O:hlrdgCJ", long_options, &option_index);
 		}
+	}
+
+	if((exit_now | bad_option ) == false)
+	{
+		//ok, we will do something, start the network check thread.
+		globals.tpool = malloc(sizeof(struct t_info));
+		pthread_create(&(globals.tpool->thread), NULL, P_online, NULL);
 
 		option_index = 0;
 		c = getopt_long(argc, argv, "vqDH:t:i:o:c:w:e:R:O:hlrdgCJ", long_options, &option_index);
@@ -235,62 +239,58 @@ void option_handler(int argc, char *argv[])
 			c = getopt_long(argc, argv, "vqDH:t:i:o:c:w:e:R:O:hlrdgCJ", long_options, &option_index);
 		}
 		//option check
-		if( exit_now == false && (
-			(globals.rain == false && globals.dict == false && globals.online == false) ||
-			(globals.hash_list == NULL && globals.wpa_list == NULL )))
-				bad_option = true; // parser functions have yet printed something
-	}
-
-	//don't wait for online check if we are going to exit
-	if((bad_option | exit_now ) == true)
-		globals.online = false;
-
-	if(globals.online==false) // if user disable network features or a problem shut it off.
-	{
-		if(pthread_kill(globals.tpool->thread,0) == 0) // thread is running
-			pthread_cancel(globals.tpool->thread);
-		if((bad_option | exit_now ) == false)
+		if((globals.rain == false && globals.dict == false && globals.online == false) ||
+			(globals.hash_list == NULL && globals.wpa_list == NULL ))
 		{
-			// fix missing option and other stuff if we'll keep going
+				// parser functions have yet printed something
+				// cancel network check, we are going to exit
+				if(pthread_kill(globals.tpool->thread,0) == 0) // thread is running
+					pthread_cancel(globals.tpool->thread);
+				pthread_join(globals.tpool->thread,NULL);
+		}
+		else if(globals.online==false) // if user disable network features or a problem shut it off.
+		{
+			if(pthread_kill(globals.tpool->thread,0) == 0) // thread is running
+				pthread_cancel(globals.tpool->thread);
 			P_hash_list();
 			P_wpa_list();
 			P_defaults();
-		}
-		pthread_join(globals.tpool->thread,NULL);
-	}
-	else
-	{
-		// fix missing option and other stuff, stealing a little extra CPU time from online check
-		P_hash_list();
-		P_wpa_list();
-		P_defaults();
-
-		for(option_index=0;pthread_kill(globals.tpool->thread,0) == 0 && option_index<NET_CHK_TIMEOUT;option_index++)
-			usleep(1000);
-		if(option_index < NET_CHK_TIMEOUT)
-		{
-			report(debug,"I've wait internet check for %d ms.",option_index);
-			pthread_join(globals.tpool->thread, (void **) &option_index);
+			pthread_join(globals.tpool->thread,NULL);
 		}
 		else
-			option_index = ETIMEDOUT;
-		if(option_index!=0)
 		{
-			report_error("network check fails.",0,0,error);
-			if(option_index == -1)
-				report_error("failed to resolve IP for mom Google.",0,0,error);
-			else
+			// fix missing option and other stuff, stealing a little extra CPU time while online check finish
+			P_hash_list();
+			P_wpa_list();
+			P_defaults();
+
+			for(option_index=0;pthread_kill(globals.tpool->thread,0) == 0 && option_index<NET_CHK_TIMEOUT;option_index++)
+				usleep(1000);
+			if(option_index < NET_CHK_TIMEOUT)
 			{
-				errno = option_index;
-				report_error("parser_online()",1,0,warning);
+				report(debug,"I've wait internet check for %d ms.",option_index);
+				pthread_join(globals.tpool->thread, (void **) &option_index);
 			}
-			report_error("switching OFF online features.",0,0,info);
-			globals.online = false;
+			else
+				option_index = ETIMEDOUT;
+			if(option_index!=0)
+			{
+				report_error("network check fails.",0,0,error);
+				if(option_index == -1)
+					report_error("failed to resolve IP for mom Google.",0,0,error);
+				else
+				{
+					errno = option_index;
+					report_error("parser_online()",1,0,warning);
+				}
+				report_error("switching OFF online features.",0,0,info);
+				globals.online = false;
+			}
 		}
+		free(globals.tpool);
+		globals.tpool=NULL;
 	}
-	free(globals.tpool);
-	globals.tpool=NULL;
-	if(bad_option == true)
+	else if(bad_option == true)
 	{
 		usage(argv[0]);
 		destroy_all();

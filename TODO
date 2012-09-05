@@ -8,5 +8,7 @@
 [normal]				must add support for md5 subtypes for cracking vBullettin, joomla and more md5 hashes.
 [normal]				pyrit crack using GPU and CPU, how handle this ?
 [normal]				add permutation attack support ( will be silently started if no results are founded? )
+[normal]				configure.ac: check for rcracki_mt
+[normal]				parser_online(): killing thread while calling getadddrinfo() will leak memory, but wait for getadddrinfo() ends is too
 [high priority]	test praser_ocl ( oclhashcat not working on workstation ).
 [high priority]	pthread_mutex_lock called by exit() ??
