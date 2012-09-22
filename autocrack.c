@@ -130,9 +130,9 @@ void option_handler(int argc, char *argv[])
 		globals.tpool = malloc(sizeof(struct t_info));
 		pthread_create(&(globals.tpool->thread), NULL, P_online, NULL);
 
-		option_index = 0;
+		optind = 1;
 		c = getopt_long(argc, argv, "vqDH:t:i:o:c:w:e:R:O:hlrdgCJ", long_options, &option_index);
-		while(c!=-1 && bad_option==false && exit_now == false)
+		while(c!=-1)
 		{
 			switch(c)
 			{
@@ -242,10 +242,11 @@ void option_handler(int argc, char *argv[])
 		if((globals.rain == false && globals.dict == false && globals.online == false) ||
 			(globals.hash_list == NULL && globals.wpa_list == NULL ))
 		{
-				// parser functions have yet printed something
+				// parser functions have yet printed something, otherwise user have specified only flags options
 				// cancel network check, we are going to exit
 				if(pthread_kill(globals.tpool->thread,0) == 0) // thread is running
 					pthread_cancel(globals.tpool->thread);
+				bad_option = true;
 				pthread_join(globals.tpool->thread,NULL);
 		}
 		else if(globals.online==false) // if user disable network features or a problem shut it off.
@@ -266,11 +267,9 @@ void option_handler(int argc, char *argv[])
 
 			for(option_index=0;pthread_kill(globals.tpool->thread,0) == 0 && option_index<NET_CHK_TIMEOUT;option_index++)
 				usleep(1000);
+			pthread_join(globals.tpool->thread, (void **) &option_index);
 			if(option_index < NET_CHK_TIMEOUT)
-			{
 				report(debug,"I've wait internet check for %d ms.",option_index);
-				pthread_join(globals.tpool->thread, (void **) &option_index);
-			}
 			else
 				option_index = ETIMEDOUT;
 			if(option_index!=0)
@@ -290,7 +289,8 @@ void option_handler(int argc, char *argv[])
 		free(globals.tpool);
 		globals.tpool=NULL;
 	}
-	else if(bad_option == true)
+
+	if(bad_option == true)
 	{
 		usage(argv[0]);
 		destroy_all();
