@@ -1,6 +1,10 @@
 Autocrack - automatically crack everything throught CPU and GPU
 Copyright (C) 2012  Massimo Dragano <massimo.dragano@gmail.com>
 
+2012-10-08 Massimo Dragano <massiom.dragano@gmail.com>
+	* autocrack.c: 	moved verbosity control on first option check.
+										optimized network check killer.
+	* INSTALL: add instructions on install-sh
 2012-09-22	Massimo Dragano <massimo.dragano@gmail.com>
 	* autocrack.c:	use optind for restart getopt counter.
 2012-09-09	Massimo Dragano <massimo.dragano@gmail.com>

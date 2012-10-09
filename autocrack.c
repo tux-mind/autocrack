@@ -98,6 +98,31 @@ void option_handler(int argc, char *argv[])
 					usage(argv[0]);
 					exit_now = true;
 					break;
+				case 'v':
+					if( globals.log_level < verbose3 )
+						globals.log_level++;
+					else if( globals.log_level == debug )
+					{
+						report_error("already in debug mode.",0,0,warning);
+					}
+					else if( globals.log_level == verbose3 )
+					{
+						report_error("maximum verbose level reached.",0,0,info);
+						report_error("use --debug or -D if you want more output",0,0,info);
+					}
+
+					break;
+
+				case 'q':
+					if(globals.log_level > info)
+						globals.log_level -= info; // keep the previous verbosity offset
+					else
+						globals.log_level = quiet;
+					break;
+
+				case 'D':
+					globals.log_level = debug;
+					break;
 				case 'H':
 				case 'i':
 				case 'o':
@@ -109,9 +134,6 @@ void option_handler(int argc, char *argv[])
 				case 'r':
 				case 'd':
 				case 'g':
-				case 'v':
-				case 'q':
-				case 'D':
 				case 'O':
 				case 'C':
 				case 'J':
@@ -137,32 +159,6 @@ void option_handler(int argc, char *argv[])
 			switch(c)
 			{
 				case 0:
-					break;
-
-				case 'v':
-					if( globals.log_level < verbose3 )
-						globals.log_level++;
-					else if( globals.log_level == debug )
-					{
-						report_error("already in debug mode.",0,0,warning);
-					}
-					else if( globals.log_level == verbose3 )
-					{
-						report_error("maximum verbose level reached.",0,0,info);
-						report_error("use --debug or -D if you want more output",0,0,info);
-					}
-
-					break;
-
-				case 'q':
-					if(globals.log_level > info)
-						globals.log_level -= info; // keep the previous verbosity offset
-					else
-						globals.log_level = quiet;
-					break;
-
-				case 'D':
-					globals.log_level = debug;
 					break;
 
 				case 'H':
@@ -267,11 +263,18 @@ void option_handler(int argc, char *argv[])
 
 			for(option_index=0;pthread_kill(globals.tpool->thread,0) == 0 && option_index<NET_CHK_TIMEOUT;option_index++)
 				usleep(1000);
-			pthread_join(globals.tpool->thread, (void **) &option_index);
-			if(option_index < NET_CHK_TIMEOUT)
-				report(debug,"I've wait internet check for %d ms.",option_index);
-			else
+			if(option_index == NET_CHK_TIMEOUT)
+			{
 				option_index = ETIMEDOUT;
+				pthread_cancel(globals.tpool->thread);
+				pthread_join(globals.tpool->thread,NULL);
+			}
+			else //network checker done, join and take errno
+			{
+				report(debug,"i've wait network check for %d ms",option_index);
+				pthread_join(globals.tpool->thread, (void **) &option_index);
+			}
+
 			if(option_index!=0)
 			{
 				report_error("network check fails.",0,0,error);

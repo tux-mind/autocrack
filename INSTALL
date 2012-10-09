@@ -8,6 +8,8 @@ simply run:
 make
 make install ( as root )
 
+if ./configure FAIL try with ./install-sh .
+
 ./configre gives you a couple of WARNING and ERROR
 if some external binaries are missing or not properly working.
 gcc will gracefully fail in preprocessing phase
