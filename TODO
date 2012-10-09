@@ -11,5 +11,9 @@
 [normal]				configure.ac: check for rcracki_mt
 [normal]				parser_online(): killing thread while calling getadddrinfo() will leak memory, but wait for getadddrinfo() ends is too
 [normal]				add feature: search for essid online ( the one with cracked algorithm ) for retrieve defaul passphrase
+[normal]				leave coWPAtty support, it fail on multiple AP caputre 
+files. we will go to integrare OSP into master branch.
 [high priority]	test praser_ocl ( oclhashcat not working on workstation ).
 [high priority]	pthread_mutex_lock called by exit() ??
+[high priority] something wrong with thread killer...we found all password but som thread still 
+running.....maybe a CURL thread...yep

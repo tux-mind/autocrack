@@ -1,7 +1,10 @@
 Autocrack - automatically crack everything throught CPU and GPU
 Copyright (C) 2012  Massimo Dragano <massimo.dragano@gmail.com>
 
-2012-10-08 Massimo Dragano <massiom.dragano@gmail.com>
+2012-10-09 Massimo Dragano <massimo.dragano@gmail.com>
+	* Makefile.am:	add check-local target
+	* test/test.sh:	testing script
+2012-10-08 Massimo Dragano <massimo.dragano@gmail.com>
 	* autocrack.c: 	moved verbosity control on first option check.
 										optimized network check killer.
 	* INSTALL: add instructions on install-sh

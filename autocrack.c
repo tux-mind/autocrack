@@ -271,6 +271,7 @@ void option_handler(int argc, char *argv[])
 			}
 			else //network checker done, join and take errno
 			{
+				
 				report(debug,"i've wait network check for %d ms",option_index);
 				pthread_join(globals.tpool->thread, (void **) &option_index);
 			}
