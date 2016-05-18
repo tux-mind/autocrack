@@ -588,7 +588,8 @@ void cap2hccap(const char *arg)
 					memset( ap_cur->essid, 0, 33 );
 					memcpy( ap_cur->essid, p + 2, n );
 				}
-				st_cur->wpa.state = 0;
+				if (st_cur != NULL)
+					st_cur->wpa.state = 0;
 				p += 2 + p[1];
 			}
 		}
